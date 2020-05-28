@@ -136,3 +136,122 @@ df['T-F'] = df['T-F'].map(map3)
 df['J-P'] = df['type'].astype(str).str[3]
 df['J-P'] = df['J-P'].map(map4)
 print(df.head(10))
+
+
+'''
+let's build the ML algorithms
+'''
+X = df.drop(['type', 'posts', 'I-E', 'N-S', 'T-F', 'J-P'], axis=1).values
+y = df['type'].values
+
+print(y.shape)
+print(X.shape)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.1, random_state=5)
+
+sgd = SGDClassifier(max_iter=5, tol=None)
+sgd.fit(X_train, y_train)
+Y_pred = sgd.predict(X_test)
+sgd.score(X_train, y_train)
+acc_sgd = round(sgd.score(X_train, y_train) * 100, 2)
+print(round(acc_sgd, 2,), "%")
+
+# Random Forest
+random_forest = RandomForestClassifier(n_estimators=100)
+random_forest.fit(X_train, y_train)
+
+Y_prediction = random_forest.predict(X_test)
+
+random_forest.score(X_train, y_train)
+acc_random_forest = round(random_forest.score(X_train, y_train) * 100, 2)
+print(round(acc_random_forest, 2,), "%")
+
+# Logistic Regression
+logreg = LogisticRegression()
+logreg.fit(X_train, y_train)
+
+Y_pred = logreg.predict(X_test)
+
+acc_log = round(logreg.score(X_train, y_train) * 100, 2)
+print(round(acc_log, 2,), "%")
+
+# KNN
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+Y_pred = knn.predict(X_test)
+
+acc_knn = round(knn.score(X_train, y_train) * 100, 2)
+print(round(acc_knn, 2,), "%")
+
+'''
+
+
+Our simple model is only able to classify people with a 24% of right guesses, which is not too much.
+
+Now we will perform machine learning with the introverted/extroverted column, and we'll see if our model is able to classify if someone is introverted or extroverted with a higher precision.
+
+'''
+XX = df.drop(['type', 'posts', 'I-E'], axis=1).values
+yy = df['I-E'].values
+
+print(yy.shape)
+print(XX.shape)
+
+XX_train, XX_test, yy_train, yy_test = train_test_split(
+    XX, yy, test_size=0.1, random_state=5)
+
+sgdd = SGDClassifier(max_iter=5, tol=None)
+sgdd.fit(XX_train, yy_train)
+Y_predd = sgdd.predict(XX_test)
+sgdd.score(XX_train, yy_train)
+acc_sgdd = round(sgdd.score(XX_train, yy_train) * 100, 2)
+print(round(acc_sgdd, 2,), "%")
+
+random_forestt = RandomForestClassifier(n_estimators=100)
+random_forestt.fit(XX_train, yy_train)
+
+Y_predictionn = random_forestt.predict(XX_test)
+
+random_forestt.score(XX_train, yy_train)
+acc_random_forestt = round(random_forestt.score(XX_train, yy_train) * 100, 2)
+print(round(acc_random_forestt, 2,), "%")
+
+# Logistic Regression
+logregg = LogisticRegression()
+logregg.fit(XX_train, yy_train)
+
+Y_predd = logregg.predict(XX_test)
+
+acc_logg = round(logregg.score(XX_train, yy_train) * 100, 2)
+print(round(acc_logg, 2,), "%")
+
+
+# KNN
+knnn = KNeighborsClassifier(n_neighbors=3)
+knnn.fit(XX_train, yy_train)
+
+Y_predd = knnn.predict(XX_test)
+
+acc_knnn = round(knnn.score(XX_train, yy_train) * 100, 2)
+print(round(acc_knnn, 2,), "%")
+
+'''
+So we see our model has an accuracy of 77%, not bad for such a simple model! Let's see what else we can do!
+'''
+new_column = []
+for z in range(len(df['posts'])):
+    prov = df['posts'][z]
+    prov2 = re.sub(r'[“€â.|,?!)(1234567890:/-]', '', prov)
+    prov3 = re.sub(
+        r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*', '', prov)
+    prov4 = re.sub(r'[|||)(?.,:1234567890!]', ' ', prov3)
+    prov5 = re.sub(' +', ' ', prov4)
+    prov6 = prov5.split(" ")
+    counter = Counter(prov6)
+    counter2 = counter.most_common(1)[0][0]
+    new_column.append(counter2)
+df['most_used_word'] = new_column
+print(df.head())
+print(df['most_used_word'].unique())
